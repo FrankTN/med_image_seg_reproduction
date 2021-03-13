@@ -1,8 +1,8 @@
 # Model training and evaluation
 
-from datagen import SimpleSequence
-import func
-import models
+from pyoneer_main.datagen import SimpleSequence
+import pyoneer_main.func as func
+import pyoneer_main.models as models
 from omegaconf import OmegaConf
 import tensorflow as tf
 import numpy as np
