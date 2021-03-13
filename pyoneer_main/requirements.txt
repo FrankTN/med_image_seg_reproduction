@@ -1,0 +1,2 @@
+tensorflow==2.3.1
+omegaconf==2.0.6
