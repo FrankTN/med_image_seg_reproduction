@@ -33,7 +33,7 @@ def large_model(input: torch.tensor, activation_choice: str, dropout) -> nn.Sequ
         activation = nn.ReLU()
 
     model = nn.Sequential(
-                            nn.Conv2d(in_channels=flat_input.size()[0], out_channels=3,kernel_size=(3,3)),
+                            nn.Conv2d(in_channels=32, out_channels=96,kernel_size=(3,3)),
                             activation,
                             nn.BatchNorm2d(2*96),
                             nn.Conv2d(in_channels=96, out_channels=96, kernel_size=(3, 3)),
@@ -43,35 +43,35 @@ def large_model(input: torch.tensor, activation_choice: str, dropout) -> nn.Sequ
                             activation,
                             nn.BatchNorm2d(2*96),
 
-                            # nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
-                            # nn.Dropout2d(p=dropout),
-                            #
-                            # nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
-                            # activation,
-                            # nn.BatchNorm2d(192),
-                            # nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
-                            # activation,
-                            # nn.BatchNorm2d(192),
-                            # nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
-                            # activation,
-                            # nn.BatchNorm2d(192),
-                            #
-                            # nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
-                            # nn.Dropout2d(p=dropout),
-                            #
-                            # nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
-                            # activation,
-                            # nn.BatchNorm2d(192),
-                            # nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
-                            # activation,
-                            # nn.BatchNorm2d(192),
-                            # nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
-                            # activation,
-                            # nn.BatchNorm2d(192),
-                            #
-                            # nn.AvgPool2d(192),
+                            nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
+                            nn.Dropout2d(p=dropout),
 
-                            nn.Linear(96, 10),
+                            nn.Conv2d(in_channels=96, out_channels=192, kernel_size=(3, 3)),
+                            activation,
+                            nn.BatchNorm2d(2*192),
+                            nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
+                            activation,
+                            nn.BatchNorm2d(2*192),
+                            nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
+                            activation,
+                            nn.BatchNorm2d(2*192),
+
+                            nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
+                            nn.Dropout2d(p=dropout),
+
+                            nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
+                            activation,
+                            nn.BatchNorm2d(2*192),
+                            nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(1, 1)),
+                            activation,
+                            nn.BatchNorm2d(2*192),
+                            nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(1, 1)),
+                            activation,
+                            nn.BatchNorm2d(2*192),
+
+                            nn.AvgPool2d(192),
+
+                            nn.Linear(192, 10),
                             nn.Softmax(),
     )
     print('Instantiated a complicated model:\n' + str(model))

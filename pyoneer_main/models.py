@@ -33,31 +33,31 @@ def get_model_large(activation, dropout):
     x = BatchNormalization()(x)
     x = Conv2D(96, (3, 3), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
     x = BatchNormalization()(x)
-    #
-    # x = MaxPooling2D(pool_size=(2, 2), strides=(2,2), padding='same')(x)
-    #
-    # x = Dropout(dropout)(x)
-    #
-    # x = Conv2D(192, (3, 3), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
-    # x = BatchNormalization()(x)
-    # x = Conv2D(192, (3, 3), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
-    # x = BatchNormalization()(x)
-    # x = Conv2D(192, (3, 3), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
-    # x = BatchNormalization()(x)
-    #
-    # x = MaxPooling2D(pool_size=(2, 2), strides=(2,2), padding='same')(x)
-    #
-    # x = Dropout(dropout)(x)
-    #
-    # x = Conv2D(192, (3, 3), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
-    # x = BatchNormalization()(x)
-    # x = Conv2D(192, (1, 1), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
-    # x = BatchNormalization()(x)
-    # x = Conv2D(192, (1, 1), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
-    # x = BatchNormalization()(x)
-    #
-    # x = GlobalAveragePooling2D()(x)
-    #
+
+    x = MaxPooling2D(pool_size=(2, 2), strides=(2,2), padding='same')(x)
+
+    x = Dropout(dropout)(x)
+
+    x = Conv2D(192, (3, 3), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Conv2D(192, (3, 3), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Conv2D(192, (3, 3), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
+    x = BatchNormalization()(x)
+
+    x = MaxPooling2D(pool_size=(2, 2), strides=(2,2), padding='same')(x)
+
+    x = Dropout(dropout)(x)
+
+    x = Conv2D(192, (3, 3), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Conv2D(192, (1, 1), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Conv2D(192, (1, 1), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
+    x = BatchNormalization()(x)
+
+    x = GlobalAveragePooling2D()(x)
+
     output = Dense(10, activation='softmax')(x)
     
     model = tf.keras.Model(inputs = [inp], outputs = [output])
