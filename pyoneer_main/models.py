@@ -4,37 +4,37 @@ from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPooling2D, \
     GlobalAveragePooling2D, BatchNormalization, Dropout
 
 
-#%% Model architectures
+# %% Model architectures
 
 def get_simple_model():
-    
     inp = tf.keras.Input(shape=(3, 32, 32))
-    
+
     x = Flatten()(inp)
     x = Dense(512, activation=tf.nn.relu)(x)
     x = Dense(512, activation=tf.nn.relu)(x)
     output = Dense(10, activation='softmax')(x)
 
-    model = tf.keras.Model(inputs = [inp], outputs = [output])
-    
+    model = tf.keras.Model(inputs=[inp], outputs=[output])
+
     return model
 
-def get_model_large(activation, dropout):
 
+def get_model_large(activation, dropout):
     if activation == 'LeakyReLU':
-        activation = tf.keras.layers.LeakyReLU(alpha = 0.1)
+        activation = tf.keras.layers.LeakyReLU(alpha=0.1)
     else:
         activation = tf.keras.layers.ReLU()
-        
+
     inp = tf.keras.Input(shape=(3, 32, 32))
-    x = Conv2D(96, (3, 3), activation=activation, kernel_initializer='he_uniform', padding='same', input_shape=(32, 32, 3), data_format="channels_last")(inp)
+    x = Conv2D(96, (3, 3), activation=activation, kernel_initializer='he_uniform', padding='same',
+               input_shape=(32, 32, 3), data_format="channels_last")(inp)
     x = BatchNormalization()(x)
     x = Conv2D(96, (3, 3), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
     x = BatchNormalization()(x)
     x = Conv2D(96, (3, 3), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
     x = BatchNormalization()(x)
 
-    x = MaxPooling2D(pool_size=(2, 2), strides=(2,2), padding='same')(x)
+    x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
 
     x = Dropout(dropout)(x)
 
@@ -45,7 +45,7 @@ def get_model_large(activation, dropout):
     x = Conv2D(192, (3, 3), activation=activation, kernel_initializer='he_uniform', padding='same')(x)
     x = BatchNormalization()(x)
 
-    x = MaxPooling2D(pool_size=(2, 2), strides=(2,2), padding='same')(x)
+    x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2), padding='same')(x)
 
     x = Dropout(dropout)(x)
 
@@ -59,17 +59,17 @@ def get_model_large(activation, dropout):
     x = GlobalAveragePooling2D()(x)
 
     output = Dense(10, activation='softmax')(x)
-    
-    model = tf.keras.Model(inputs = [inp], outputs = [output])
-    
+
+    model = tf.keras.Model(inputs=[inp], outputs=[output])
+
     return model
 
 
-#%% Model classes with custom training
+# %% Model classes with custom training
 
 class SemiSupervisedConsistencyModel(tf.keras.Model):
-    
-    def compile(self, p, optimizer, loss, metrics = [], run_eagerly = False):
+
+    def compile(self, p, optimizer, loss, metrics=[], run_eagerly=False):
         """
         Compile the model.
 
@@ -97,14 +97,13 @@ class SemiSupervisedConsistencyModel(tf.keras.Model):
         self.p = p
         self.optimizer = optimizer
         self.loss = loss
-        self.loss_trackers = [tf.keras.metrics.Mean(name = 'loss'),
-                              tf.keras.metrics.Mean(name = 'loss_sup'),
-                              tf.keras.metrics.Mean(name = 'loss_usup')]
+        self.loss_trackers = [tf.keras.metrics.Mean(name='loss'),
+                              tf.keras.metrics.Mean(name='loss_sup'),
+                              tf.keras.metrics.Mean(name='loss_usup')]
         self.extra_metrics = metrics
-        
+
         self._run_eagerly = run_eagerly
-    
-        
+
     def compute_loss(self, data):
         """
         Compute total loss:
@@ -128,34 +127,34 @@ class SemiSupervisedConsistencyModel(tf.keras.Model):
         pair_usup : a tuple of tensors
             Predictions on two differently transformed labeled and unlabeled examples.
         """
-        
+
         x, y, labeled = data
-        
+
         # number of unique labeled and labeled+unlabeled images
         n_labeled = tf.cast(tf.math.count_nonzero(labeled), tf.int32) // 2
         n = tf.shape(x)[0] // 2
 
         # compute predictions on all examples
         pred = self(x)
-        
+
         # separate labeled images from the rest
-        yl = tf.concat((y[:n_labeled, ...], y[:n_labeled, ...]), axis = 0)
-        predl = tf.concat((pred[:n_labeled, ...], pred[n:(n+n_labeled), ...]), axis = 0)
-        
+        yl = tf.concat((y[:n_labeled, ...], y[:n_labeled, ...]), axis=0)
+        predl = tf.concat((pred[:n_labeled, ...], pred[n:(n + n_labeled), ...]), axis=0)
+
         # separate differently transformed 
         pred1, pred2 = pred[:n, ...], pred[n:, ...]
-        
+
         # supervised loss
-        loss_sup = self.loss(yl, predl)       
+        loss_sup = self.loss(yl, predl)
 
         # unsupervised loss made symmetric (e.g. KL divergence is not symmetric)
         loss_usup = (self.loss(pred1, pred2) + self.loss(pred2, pred1)) / 2
-        
+
         # total loss: supervised + weight * unsupervised consistency
         loss_value = loss_sup + self.p.alpha * loss_usup
-        
+
         return loss_value, loss_sup, loss_usup, (yl, predl), (pred1, pred2)
-    
+
     def update_metrics(self, data, loss_values, pair_sup, pair_usup):
         """
         Updates loss trackers and metrics so that they return the current moving averages.
@@ -169,22 +168,22 @@ class SemiSupervisedConsistencyModel(tf.keras.Model):
         # obtain prediction - target pairs       
         yl, predl = pair_sup
         pred1, pred2 = pair_usup
-        
+
         # for every metric type
         # sup:      metrics on the labeled subset measuring GT vs clean prediction fidelity
         # usup:     metrics on the entire batch measuring consistency
         for metric_type, y_true, y_pred in zip(['sup', 'usup'],
-                                             [yl, pred1],
-                                             [predl, pred2]):
-            
+                                               [yl, pred1],
+                                               [predl, pred2]):
+
             for metric in self.extra_metrics:
-                
+
                 # if metric name contains the type name
                 if metric_type in metric.name.split('_'):
                     metric.update_state(y_true, y_pred)
-            
+
         return {m.name: m.result() for m in self.metrics}
-    
+
     def train_step(self, data):
         """
         This method is called by model.fit() for every batch.
@@ -207,13 +206,13 @@ class SemiSupervisedConsistencyModel(tf.keras.Model):
             loss_value, loss_sup, loss_usup, pair_sup, pair_usup = self.compute_loss(data)
 
         grads = tape.gradient(loss_value, self.trainable_variables)
-        
-        self.optimizer.apply_gradients(zip(grads, self.trainable_variables))        
-        
+
+        self.optimizer.apply_gradients(zip(grads, self.trainable_variables))
+
         metric_values = self.update_metrics(data, [loss_value, loss_sup, loss_usup], pair_sup, pair_usup)
 
         return metric_values
-        
+
     def test_step(self, data):
         """
         This method is called by model.fit() during the validation step
@@ -222,9 +221,9 @@ class SemiSupervisedConsistencyModel(tf.keras.Model):
         """
 
         loss_value, loss_sup, loss_usup, pair_sup, pair_usup = self.compute_loss(data)
-        
+
         metric_values = self.update_metrics(data, [loss_value, loss_sup, loss_usup], pair_sup, pair_usup)
-        
+
         return metric_values
 
     @property

@@ -53,9 +53,9 @@ class SimpleSequence(tf.keras.utils.Sequence):
             num_to_add = self.p.batch_size - batch_idx.shape[0]
             batch_idx = np.concatenate((batch_idx, self.indexes[:num_to_add]), axis=0)
 
-        batch_x = self.data['x'][batch_idx, ...]
-        batch_y = self.data['y'][batch_idx, ...]
-        batch_labeled = self.data['labeled'][batch_idx]
+        batch_x = np.array([self.data['x'][i, ...] for i in batch_idx])
+        batch_y = np.array([self.data['y'][i, ...] for i in batch_idx])
+        batch_labeled = np.array([self.data['labeled'][i, ...] for i in batch_idx])
 
         # normalize image values between 0 and 1
         batch_x = batch_x / 255

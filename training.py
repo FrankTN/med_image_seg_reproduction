@@ -1,13 +1,16 @@
 # Model training and evaluation
 
+import elasticdeform
+
 from pyoneer_main.datagen import SimpleSequence
 import pyoneer_main.func as func
-import pyoneer_main.models as models
+import model_arch
 from omegaconf import OmegaConf
 import tensorflow as tf
 import numpy as np
 import os
 import time
+import torch
 
 
 # comment this line out to use gpu:
@@ -20,8 +23,6 @@ p = OmegaConf.load('params.yml')
 run_eagerly = True     # set to true to debug model training
 
 # %% Data split parameters
-
-
 # train-validation-test split
 
 # semi-supervised learning:
@@ -36,7 +37,7 @@ else:
     raise Exception('Data split not found: ', p.data_split)
 
 
-# an indicator array indicatig whether a training example is labeled
+# an indicator array indicating whether a training example is labeled
 labeled = np.ones((60000, ), dtype = bool)
 
 if p.data_split == 'cifar10_ssl_default':
@@ -80,14 +81,13 @@ test_gen = SimpleSequence(p, data_split['testIDs'],
 
 # %% Build the model architecture
 
-model_arch = getattr(models, 'get_' + p.arch.name)(**p.arch.params)
+model_arch = getattr(model_arch, p.arch.name)(torch.Tensor(3, 32, 32))#**p.arch.params)
 
-model_arch.summary()
+print(model_arch)
 
-# %% Compile the model
 
 # create an optimizer
-opt = getattr(tf.keras.optimizers, p.optimizer.name)(**p.optimizer.params)
+opt = torch.optim.Adam(model_arch.parameters(), lr=0.001)
 
 # create metrics
 metrics = [getattr(tf.keras.metrics, metric_class)(name=('%s_%s' % (metric_type, metric_name)))
@@ -95,10 +95,10 @@ metrics = [getattr(tf.keras.metrics, metric_class)(name=('%s_%s' % (metric_type,
            for metric_class, metric_name in zip(['CategoricalAccuracy'], ['acc'])]
 
 
-model = models.SemiSupervisedConsistencyModel(inputs=[model_arch.input],
-                                              outputs=[model_arch.output])
-model.compile(optimizer = opt, loss = getattr(func, p.loss),
-              metrics = metrics, run_eagerly = run_eagerly, p = p)
+# model = model_arch.SemiSupervisedConsistencyModel(inputs=[model_arch.input],
+#                                               outputs=[model_arch.output])
+# model.compile(optimizer = opt, loss = getattr(func, p.loss),
+#               metrics = metrics, run_eagerly = run_eagerly, p = p)
 
 # %% Train the model
 
