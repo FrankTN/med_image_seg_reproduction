@@ -82,12 +82,13 @@ def large_model(input: torch.tensor, activation_choice: str, dropout) -> nn.Sequ
 
 class SemiSupervisedConsistencyModelTorch(nn.Module):
 
-    def __init__(self, p, optimizer, loss, metrics=[]):
+    # def __init__(self, p, optimizer, loss, metrics=[]):
+    def __init__(self):
         super().__init__()
-        self.p = p
-        self.optimizer = optimizer
-        self.loss = loss
-        self.metrics = metrics
+        # self.p = p
+        # self.optimizer = optimizer
+        # self.loss = loss
+        # self.metrics = metrics
 
     def compute_loss(self, data):
         """
