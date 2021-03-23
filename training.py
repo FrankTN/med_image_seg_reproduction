@@ -1,6 +1,5 @@
 # Model training and evaluation
 
-import elasticdeform
 
 from pyoneer_main.datagen import SimpleSequence
 import pyoneer_main.func as func
