@@ -2,11 +2,9 @@
 
 
 from pyoneer_main.datagen import SimpleSequence
-import pyoneer_main.func as func
 import torch_models
 import loss_torch as loss
 from omegaconf import OmegaConf
-import tensorflow as tf
 import numpy as np
 import os
 import time
@@ -46,6 +44,8 @@ labeled = np.ones((60000, ), dtype = bool)
 if p.data_split == 'cifar10_ssl_default':
     labeled[4000:49000, ...] = False
 
+
+
 # Torch data loading
 transform = transforms.Compose(
     [transforms.ToTensor(),
@@ -53,32 +53,27 @@ transform = transforms.Compose(
 
 trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
                                         download=True, transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
-                                          shuffle=True, num_workers=2)
+x_train = trainset.data
+y_train = trainset.targets
 
 testset = torchvision.datasets.CIFAR10(root='./data', train=False,
                                        download=True, transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=4,
-                                         shuffle=False, num_workers=2)
-
-classes = ('plane', 'car', 'bird', 'cat',
-           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-
-
+x_test = testset.data
+y_test = testset.targets
 
 # %% Data load and prep
 
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+# (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
 x = np.concatenate((x_train, x_test)).astype('float32')
 y = np.concatenate((y_train, y_test))
 
 # NOTE ADDED BECAUSE OF COMPATIBILITY ISSUES
 # Swap x data
-x = tf.transpose(x,[0,3,2,1])
+x = np.transpose(x, (0,3,2,1))
 
 # class numbers -> one-hot representation
-y = tf.keras.utils.to_categorical(y)
+y = np.eye(y.max()+1)[y]
 
 data = {'x': x, 'y': y, 'labeled': labeled}
 
@@ -112,10 +107,10 @@ print(arch)
 # create an optimizer
 opt = torch.optim.Adam(arch.parameters(), lr=0.001)
 
-# create metrics
-metrics = [getattr(tf.keras.metrics, metric_class)(name=('%s_%s' % (metric_type, metric_name)))
-           for metric_type in ['sup', 'usup']
-           for metric_class, metric_name in zip(['CategoricalAccuracy'], ['acc'])]
+# # create metrics
+# metrics = [getattr(tf.keras.metrics, metric_class)(name=('%s_%s' % (metric_type, metric_name)))
+#            for metric_type in ['sup', 'usup']
+#            for metric_class, metric_name in zip(['CategoricalAccuracy'], ['acc'])]
 
 
 model = torch_models.SemiSupervisedConsistencyModelTorch(arch)
@@ -148,23 +143,6 @@ for t in tqdm(range(0, p.epochs)):
 
     print(str(t) + "\n")
     print("loss:", loss.item(),"loss_sup:", loss_sup.item(), "loss_usup:", loss_usup.item(),)
-
-# %% Train the model
-# start = time.time()
-#
-# history = model.fit(x = train_gen,
-#                     epochs = p.epochs,
-#                     verbose = 1,
-#                     validation_data = val_gen)
-#
-# print('Training time: %.1f seconds.' % (time.time() - start))
-#
-# # %% Evaluate the model on the test set
-#
-# metric_values = model.evaluate(test_gen)
-#
-# for metric_name, metric_value in zip(model.metrics_names, metric_values):
-#     print('%s: %.3f' % (metric_name, metric_value))
 
 
 
