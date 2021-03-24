@@ -23,51 +23,53 @@ def simple_model(input: torch.tensor) -> nn.Sequential:
     return model
 
 
-def large_model(input: torch.tensor, activation_choice: str, dropout) -> nn.Sequential:
+def large_model(input: torch.tensor, activation: str, dropout) -> nn.Sequential:
     # NUM_CHANNELS = 3
 
     flat_input = torch.flatten(input)
 
-    if activation_choice == 'LeakyReLU':
-        activation = nn.LeakyReLU(0.1)
+    if activation == 'LeakyReLU':
+        activation_f = nn.LeakyReLU(0.1)
     else:
-        activation = nn.ReLU()
+        activation_f = nn.ReLU()
+
+    # Conv layer params = (m*n*d+1)*k
 
     model = nn.Sequential(
-                            nn.Conv2d(in_channels=32, out_channels=96,kernel_size=(3,3)),
-                            activation,
+                            nn.Conv2d(in_channels=3, out_channels=96,kernel_size=(3,3)),
+                            activation_f,
                             nn.BatchNorm2d(2*96),
                             nn.Conv2d(in_channels=96, out_channels=96, kernel_size=(3, 3)),
-                            activation,
+                            activation_f,
                             nn.BatchNorm2d(2*96),
                             nn.Conv2d(in_channels=96, out_channels=96, kernel_size=(3, 3)),
-                            activation,
+                            activation_f,
                             nn.BatchNorm2d(2*96),
 
                             nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
                             nn.Dropout2d(p=dropout),
 
                             nn.Conv2d(in_channels=96, out_channels=192, kernel_size=(3, 3)),
-                            activation,
+                            activation_f,
                             nn.BatchNorm2d(2*192),
                             nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
-                            activation,
+                            activation_f,
                             nn.BatchNorm2d(2*192),
                             nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
-                            activation,
+                            activation_f,
                             nn.BatchNorm2d(2*192),
 
                             nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
                             nn.Dropout2d(p=dropout),
 
                             nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
-                            activation,
+                            activation_f,
                             nn.BatchNorm2d(2*192),
                             nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(1, 1)),
-                            activation,
+                            activation_f,
                             nn.BatchNorm2d(2*192),
                             nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(1, 1)),
-                            activation,
+                            activation_f,
                             nn.BatchNorm2d(2*192),
 
                             nn.AvgPool2d(192),

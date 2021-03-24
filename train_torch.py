@@ -63,8 +63,6 @@ y_test = testset.targets
 
 # %% Data load and prep
 
-# (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
-
 x = np.concatenate((x_train, x_test)).astype('float32')
 y = np.concatenate((y_train, y_test))
 
@@ -99,7 +97,7 @@ test_gen = SimpleSequence(p, data_split['testIDs'],
 
 # %% Build the model architecture
 
-arch = getattr(torch_models, p.arch.name)(torch.Tensor(3, 32, 32))#**p.arch.params)
+arch = getattr(torch_models, p.arch.name)(torch.Tensor(3, 32, 32), **p.arch.params)
 
 print(arch)
 
@@ -125,13 +123,14 @@ for t in tqdm(range(0, p.epochs)):
     for i in range(0,train_gen.__len__()):
         # obtain data from the generator
         x, y, labeled = train_gen.__getitem__(i)
+        x = torch.Tensor(x)
         y = torch.Tensor(y)
         labeled = torch.Tensor(labeled)
 
         # Zero gradients, perform a backward pass, and update the weights.
         optimizer.zero_grad()
 
-        x_flat = torch.flatten(torch.Tensor(x), start_dim=1)
+        x_flat = torch.flatten(x, start_dim=1)
         # forward pass
         y_pred = model(x_flat)
 
@@ -140,7 +139,7 @@ for t in tqdm(range(0, p.epochs)):
 
         loss.backward()
         optimizer.step()
-
+    train_gen.on_epoch_end()
     print(str(t) + "\n")
     print("loss:", loss.item(),"loss_sup:", loss_sup.item(), "loss_usup:", loss_usup.item(),)
 

@@ -14,10 +14,9 @@ transform:
 arch:
     name: simple_model
     params: {}
-    # name: 'model_large'
-    # params:
-    #     activation: 'LeakyReLU'
-    #     dropout: 0.5
+#    params:
+#         activation: 'LeakyReLU'
+#         dropout: 0.5
 
 optimizer:
     name: Adam
