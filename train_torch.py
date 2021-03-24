@@ -116,3 +116,28 @@ metric_values = model.evaluate(test_gen)
 
 for metric_name, metric_value in zip(model.metrics_names, metric_values):
     print('%s: %.3f' % (metric_name, metric_value))
+
+
+# ----- Our training loop -------
+# x = torch.linspace(-math.pi, math.pi, 2000)
+# y = torch.sin(x)
+#
+# model = SemiSupervisedConsistencyModelTorch()
+#
+# criterion = custom_loss
+# optimizer = torch.optim.Adam()
+# epochs = 1000
+
+# for t in range(0, epochs):
+#     # forward pass
+#     y_pred = model(x)
+#
+#     # compute loss
+#     loss = criterion(y_pred, y)
+#     if t % 10 == 9:
+#         print(t, loss.item())
+#
+#     # Zero gradients, perform a backward pass, and update the weights.
+#     optimizer.zero_grad()
+#     loss.backward()
+#     optimizer.step()
