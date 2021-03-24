@@ -1,8 +1,5 @@
 import torch
 from torch import nn
-import math
-
-from model_arch import SemiSupervisedConsistencyModelTorch
 
 
 def kl_divergence(y_true, y_pred):

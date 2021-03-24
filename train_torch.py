@@ -10,6 +10,8 @@ import numpy as np
 import os
 import time
 import torch
+import torchvision
+import torchvision.transforms as transforms
 
 
 # comment this line out to use gpu:
@@ -42,9 +44,30 @@ labeled = np.ones((60000, ), dtype = bool)
 if p.data_split == 'cifar10_ssl_default':
     labeled[4000:49000, ...] = False
 
+# Torch data loading
+transform = transforms.Compose(
+    [transforms.ToTensor(),
+     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
+                                        download=True, transform=transform)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
+                                          shuffle=True, num_workers=2)
+
+testset = torchvision.datasets.CIFAR10(root='./data', train=False,
+                                       download=True, transform=transform)
+testloader = torch.utils.data.DataLoader(testset, batch_size=4,
+                                         shuffle=False, num_workers=2)
+
+classes = ('plane', 'car', 'bird', 'cat',
+           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+
+
+
 # %% Data load and prep
 
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+
 x = np.concatenate((x_train, x_test)).astype('float32')
 y = np.concatenate((y_train, y_test))
 
@@ -80,13 +103,13 @@ test_gen = SimpleSequence(p, data_split['testIDs'],
 
 # %% Build the model architecture
 
-model_arch = getattr(model_arch, p.arch.name)(torch.Tensor(3, 32, 32))#**p.arch.params)
+arch = getattr(model_arch, p.arch.name)(torch.Tensor(3, 32, 32))#**p.arch.params)
 
-print(model_arch)
+print(arch)
 
 
 # create an optimizer
-opt = torch.optim.Adam(model_arch.parameters(), lr=0.001)
+opt = torch.optim.Adam(arch.parameters(), lr=0.001)
 
 # create metrics
 metrics = [getattr(tf.keras.metrics, metric_class)(name=('%s_%s' % (metric_type, metric_name)))
@@ -98,6 +121,10 @@ metrics = [getattr(tf.keras.metrics, metric_class)(name=('%s_%s' % (metric_type,
 #                                               outputs=[model_arch.output])
 # model.compile(optimizer = opt, loss = getattr(func, p.loss),
 #               metrics = metrics, run_eagerly = run_eagerly, p = p)
+
+data_np = np.array(train_gen.data)
+data_torch = torch.from_numpy(data_np)
+model = model_arch.SemiSupervisedConsistencyModelTorch(data_torch[0])
 
 # %% Train the model
 
