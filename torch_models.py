@@ -84,12 +84,12 @@ def large_model(input: torch.tensor, activation_choice: str, dropout) -> nn.Sequ
 class SemiSupervisedConsistencyModelTorch(nn.Module):
 
     # def __init__(self, p, optimizer, loss, metrics=[]):
-    def __init__(self, size):
+    def __init__(self, model):
         super().__init__()
-        self.model = simple_model(size)
+        self.model = model
 
     def forward(self, data):
-        return self.model.forward(data)
+        return self.model(data)
 
 
 

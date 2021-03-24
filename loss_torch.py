@@ -45,7 +45,7 @@ def custom_loss(data, pred, p):
 
     # number of unique labeled and labeled+unlabeled images
     n_labeled = torch.count_nonzero(labeled) // 2
-    n = list(x.size)[0] // 2
+    n = x.shape[0] // 2
 
     # separate labeled images from the rest
     yl = torch.cat((y[:n_labeled, ...], y[:n_labeled, ...]), dim=0)

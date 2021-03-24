@@ -3,7 +3,8 @@
 
 from pyoneer_main.datagen import SimpleSequence
 import pyoneer_main.func as func
-import model_arch
+import torch_models
+import loss_torch as loss
 from omegaconf import OmegaConf
 import tensorflow as tf
 import numpy as np
@@ -12,6 +13,7 @@ import time
 import torch
 import torchvision
 import torchvision.transforms as transforms
+from tqdm import tqdm
 
 
 # comment this line out to use gpu:
@@ -90,7 +92,6 @@ def get_data_subset(data, split, subset):
 
 # %% Init generators
 
-
 train_gen = SimpleSequence(p, data_split['trainIDs'],
                            data=get_data_subset(data, data_split, 'train'))
 
@@ -103,7 +104,7 @@ test_gen = SimpleSequence(p, data_split['testIDs'],
 
 # %% Build the model architecture
 
-arch = getattr(model_arch, p.arch.name)(torch.Tensor(3, 32, 32))#**p.arch.params)
+arch = getattr(torch_models, p.arch.name)(torch.Tensor(3, 32, 32))#**p.arch.params)
 
 print(arch)
 
@@ -117,54 +118,51 @@ metrics = [getattr(tf.keras.metrics, metric_class)(name=('%s_%s' % (metric_type,
            for metric_class, metric_name in zip(['CategoricalAccuracy'], ['acc'])]
 
 
-# model = model_arch.SemiSupervisedConsistencyModel(inputs=[model_arch.input],
-#                                               outputs=[model_arch.output])
-# model.compile(optimizer = opt, loss = getattr(func, p.loss),
-#               metrics = metrics, run_eagerly = run_eagerly, p = p)
-
-data_np = np.array(train_gen.data)
-data_torch = torch.from_numpy(data_np)
-model = model_arch.SemiSupervisedConsistencyModelTorch(data_torch[0])
-
-# %% Train the model
-
-start = time.time()
-
-history = model.fit(x = train_gen,
-                    epochs = p.epochs,
-                    verbose = 1,
-                    validation_data = val_gen)
-
-print('Training time: %.1f seconds.' % (time.time() - start))
-
-# %% Evaluate the model on the test set
-
-metric_values = model.evaluate(test_gen)
-
-for metric_name, metric_value in zip(model.metrics_names, metric_values):
-    print('%s: %.3f' % (metric_name, metric_value))
-
+model = torch_models.SemiSupervisedConsistencyModelTorch(arch)
 
 # ----- Our training loop -------
-# x = torch.linspace(-math.pi, math.pi, 2000)
-# y = torch.sin(x)
-#
-# model = SemiSupervisedConsistencyModelTorch()
-#
-# criterion = custom_loss
-# optimizer = torch.optim.Adam()
-# epochs = 1000
+start = time.time()
 
-# for t in range(0, epochs):
-#     # forward pass
-#     y_pred = model(x)
+criterion = loss.custom_loss
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+for t in tqdm(range(0, p.epochs)):
+    for i in range(0,train_gen.__len__()):
+        # obtain data from the generator
+        x, y, labeled = train_gen.__getitem__(i)
+        y = torch.Tensor(y)
+        labeled = torch.Tensor(labeled)
+
+        x_flat = torch.flatten(torch.Tensor(x), start_dim=1)
+        # forward pass
+        y_pred = model(x_flat)
+
+        # compute loss
+        loss, loss_sup, loss_usup, (yl, predl), (pred1, pred2) = criterion((x, y, labeled), y_pred, p)
+        if t % 10 == 9:
+            print(t, loss.item())
+
+        # Zero gradients, perform a backward pass, and update the weights.
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+# %% Train the model
+# start = time.time()
 #
-#     # compute loss
-#     loss = criterion(y_pred, y)
-#     if t % 10 == 9:
-#         print(t, loss.item())
+# history = model.fit(x = train_gen,
+#                     epochs = p.epochs,
+#                     verbose = 1,
+#                     validation_data = val_gen)
 #
-#     # Zero gradients, perform a backward pass, and update the weights.
-#     optimizer.zero_grad()
-#     loss.backward()
-#     optimizer.step()
+# print('Training time: %.1f seconds.' % (time.time() - start))
+#
+# # %% Evaluate the model on the test set
+#
+# metric_values = model.evaluate(test_gen)
+#
+# for metric_name, metric_value in zip(model.metrics_names, metric_values):
+#     print('%s: %.3f' % (metric_name, metric_value))
+
+
+
