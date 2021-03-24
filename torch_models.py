@@ -17,7 +17,7 @@ def simple_model(input: torch.tensor) -> nn.Sequential:
                           nn.Linear(512, 512, ),
                           nn.ReLU(),
                           nn.Linear(512, 10),
-                          nn.Softmax(),
+                          nn.Softmax(dim=1),
                           )
     print('Instantiated a simple model:\n' + str(model))
     return model
@@ -73,7 +73,7 @@ def large_model(input: torch.tensor, activation_choice: str, dropout) -> nn.Sequ
                             nn.AvgPool2d(192),
 
                             nn.Linear(192, 10),
-                            nn.Softmax(),
+                            nn.Softmax(dim=1),
     )
     print('Instantiated a complicated model:\n' + str(model))
     return model

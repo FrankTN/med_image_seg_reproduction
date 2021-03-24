@@ -142,12 +142,12 @@ for t in tqdm(range(0, p.epochs)):
 
         # compute loss
         loss, loss_sup, loss_usup, (yl, predl), (pred1, pred2) = criterion((x, y, labeled), y_pred, p)
-        print("loss:", loss.item(),"loss_sup:", loss_sup.item(), "loss_usup:", loss_usup.item(),)
 
         loss.backward()
         optimizer.step()
 
-    print(t, loss.item())
+    print(str(t) + "\n")
+    print("loss:", loss.item(),"loss_sup:", loss_sup.item(), "loss_usup:", loss_usup.item(),)
 
 # %% Train the model
 # start = time.time()
