@@ -133,19 +133,21 @@ for t in tqdm(range(0, p.epochs)):
         y = torch.Tensor(y)
         labeled = torch.Tensor(labeled)
 
+        # Zero gradients, perform a backward pass, and update the weights.
+        optimizer.zero_grad()
+
         x_flat = torch.flatten(torch.Tensor(x), start_dim=1)
         # forward pass
         y_pred = model(x_flat)
 
         # compute loss
         loss, loss_sup, loss_usup, (yl, predl), (pred1, pred2) = criterion((x, y, labeled), y_pred, p)
-        if t % 10 == 9:
-            print(t, loss.item())
+        print("loss:", loss.item(),"loss_sup:", loss_sup.item(), "loss_usup:", loss_usup.item(),)
 
-        # Zero gradients, perform a backward pass, and update the weights.
-        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+
+    print(t, loss.item())
 
 # %% Train the model
 # start = time.time()
