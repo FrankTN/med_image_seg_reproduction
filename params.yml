@@ -12,11 +12,11 @@ transform:
 
 # network architecture
 arch:
-    name: simple_model
-    params: {}
-#    params:
-#         activation: 'LeakyReLU'
-#         dropout: 0.5
+    name: large_model
+#    params: {}
+    params:
+         activation: 'LeakyReLU'
+         dropout: 0.5
 
 optimizer:
     name: Adam

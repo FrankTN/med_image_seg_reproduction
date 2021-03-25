@@ -132,7 +132,7 @@ for t in tqdm(range(0, p.epochs)):
 
         x_flat = torch.flatten(x, start_dim=1)
         # forward pass
-        y_pred = model(x_flat)
+        y_pred = model(x)
 
         # compute loss
         loss, loss_sup, loss_usup, (yl, predl), (pred1, pred2) = criterion((x, y, labeled), y_pred, p)
