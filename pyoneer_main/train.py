@@ -18,7 +18,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 p = OmegaConf.load('params.yml')
 
-run_eagerly = False     # set to true to debug model training
+run_eagerly = True     # set to true to debug model training
 
 # %% Data split parameters
 
@@ -48,6 +48,10 @@ if p.data_split == 'cifar10_ssl_default':
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 x = np.concatenate((x_train, x_test)).astype('float32')
 y = np.concatenate((y_train, y_test))
+
+# Added for compatibility again
+x = np.transpose(x, (0,3,2,1))
+
 
 # class numbers -> one-hot representation
 y = tf.keras.utils.to_categorical(y)
