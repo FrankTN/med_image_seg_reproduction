@@ -1,6 +1,9 @@
 # Experiment parameters
 
-data_split: cifar10_ssl_default
+results_path: 'results'
+exp_name: 'ssl test'
+
+data_split: cifar10_default
 
 num_classes: 10
 
@@ -8,16 +11,16 @@ num_classes: 10
 transform:
     name: transform_random_noise
     params:
-        sigma: 0.1
+        sigma: 0.01
 
 # network architecture
 arch:
-    name: simple_model
-    params: {}
-    # name: 'model_large'
-    # params:
-    #     activation: 'LeakyReLU'
-    #     dropout: 0.5
+    # name: simple_model
+    # params: {}
+    name: 'model_conv_small'
+    params:
+        activation: 'LeakyReLU'
+        dropout: 0.5
 
 optimizer:
     name: Adam
@@ -26,9 +29,9 @@ optimizer:
 
 # loss function
 loss: kl_divergence
-alpha: 1
+alpha: 0
 
 # training
 batch_size: 128
-epochs: 10
+epochs: 120
 # epochs: 120 # should be enough to converge

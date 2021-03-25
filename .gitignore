@@ -1,6 +1,5 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea/
-pyoneer_main/
 venv/
 *.tar.gz
 data
