@@ -36,48 +36,48 @@ def large_model(input: torch.tensor, activation: str, dropout) -> nn.Sequential:
     # Conv layer params = (m*n*d+1)*k
 
     model = nn.Sequential(
-                            nn.Conv2d(in_channels=3, out_channels=96,kernel_size=(3,3)),
+                            nn.Conv2d(in_channels=3, out_channels=96,kernel_size=(3, 3)),
                             activation_f,
-                            nn.BatchNorm2d(2*96),
+                            nn.BatchNorm2d(96),
                             nn.Conv2d(in_channels=96, out_channels=96, kernel_size=(3, 3)),
                             activation_f,
-                            nn.BatchNorm2d(2*96),
+                            nn.BatchNorm2d(96),
                             nn.Conv2d(in_channels=96, out_channels=96, kernel_size=(3, 3)),
                             activation_f,
-                            nn.BatchNorm2d(2*96),
+                            nn.BatchNorm2d(96),
 
-                            nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
+                            nn.MaxPool2d(kernel_size=(2, 2)),
                             nn.Dropout2d(p=dropout),
 
                             nn.Conv2d(in_channels=96, out_channels=192, kernel_size=(3, 3)),
                             activation_f,
-                            nn.BatchNorm2d(2*192),
+                            nn.BatchNorm2d(192),
                             nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
                             activation_f,
-                            nn.BatchNorm2d(2*192),
+                            nn.BatchNorm2d(192),
                             nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
                             activation_f,
-                            nn.BatchNorm2d(2*192),
+                            nn.BatchNorm2d(192),
 
-                            nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
+                            nn.MaxPool2d(kernel_size=(2, 2)),
                             nn.Dropout2d(p=dropout),
 
                             nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
                             activation_f,
-                            nn.BatchNorm2d(2*192),
+                            nn.BatchNorm2d(192),
                             nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(1, 1)),
                             activation_f,
-                            nn.BatchNorm2d(2*192),
+                            nn.BatchNorm2d(192),
                             nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(1, 1)),
                             activation_f,
-                            nn.BatchNorm2d(2*192),
+                            nn.BatchNorm2d(192),
 
                             nn.AvgPool2d(192),
 
                             nn.Linear(192, 10),
                             nn.Softmax(dim=1),
     )
-    print('Instantiated a complicated model:\n' + str(model))
+    # print('Instantiated a complicated model:\n' + str(model))
     return model
 
 # summary(simple_model(torch.empty([3,32,32])))
@@ -96,5 +96,5 @@ class SemiSupervisedConsistencyModelTorch(nn.Module):
 
 
 
-summary(large_model(torch.empty([32,32]), '', 0.4))
-print(models.get_model_large('', 0.4).summary())
+# summary(large_model(torch.empty([32,32]), '', 0.4))
+# print(models.get_model_conv_small('', 0.4).summary())
