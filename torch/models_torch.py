@@ -11,13 +11,15 @@ import loss_torch
 
 
 class Print(nn.Module):
+    """
+    Debug layer for printing layer dimensions
+    """
     def __init__(self, label):
         super(Print, self).__init__()
         self.label = label
 
     def forward(self, x):
-        print('label: ', self.label)
-        print(x.shape)
+        print('label: ', self.label, ', shape: ', x.shape)
         return x
 
 

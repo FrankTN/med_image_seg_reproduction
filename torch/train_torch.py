@@ -2,7 +2,7 @@
 
 
 from pyoneer_main.datagen import SimpleSequence
-import torch_models
+import models_torch
 import loss_torch as loss
 from omegaconf import OmegaConf
 import numpy as np
@@ -19,7 +19,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 # %% Load and specify parameters
 
-p = OmegaConf.load('params.yml')
+p = OmegaConf.load('../params.yml')
 
 run_eagerly = True     # set to true to debug model training
 
@@ -97,7 +97,7 @@ test_gen = SimpleSequence(p, data_split['testIDs'],
 
 # %% Build the model architecture
 
-arch = getattr(torch_models, p.arch.name)(torch.Tensor(3, 32, 32), **p.arch.params)
+arch = getattr(models_torch, p.arch.name)(torch.Tensor(3, 32, 32), **p.arch.params)
 
 print(arch)
 
@@ -111,7 +111,7 @@ opt = torch.optim.Adam(arch.parameters(), lr=0.001)
 #            for metric_class, metric_name in zip(['CategoricalAccuracy'], ['acc'])]
 
 
-model = torch_models.SemiSupervisedConsistencyModelTorch(arch)
+model = models_torch.SemiSupervisedConsistencyModelTorch(arch)
 
 # ----- Our training loop -------
 start = time.time()
