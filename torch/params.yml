@@ -33,7 +33,7 @@ transform_output: False
 arch:
     # name: simple_model
     # params: {}
-    name: 'model_conv_small'
+    name: 'large_model'
     params:
         activation: 'LeakyReLU'
         dropout: 0.5

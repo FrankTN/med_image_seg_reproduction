@@ -132,5 +132,7 @@ class SemiSupervisedConsistencyModelTorch(nn.Module):
     def forward(self, data):
         return self.model(data)
 
-# summary(large_model(torch.empty([32,32]), '', 0.4))
-# print(models.get_model_conv_small('', 0.4).summary())
+print('pytorch:')
+summary(large_model(torch.empty([32,32]), '', 0.4))
+print('tensorflow:')
+print(models.get_model_conv_small('', 0.4).summary())

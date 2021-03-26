@@ -14,11 +14,16 @@ from datagen import SimpleSequence
 # comment this line out to use gpu:
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
+# sets the dimension order to 'channel_first', which the rest of the code assumes
+tf.keras.backend.set_image_data_format("channels_first")
+
 # %% Load and specify parameters
 
-p = OmegaConf.load('params.yml')
+params_file = 'params.yml'
 
-run_eagerly = True     # set to true to debug model training
+p = OmegaConf.load(params_file)
+
+run_eagerly = True    # set to true to debug model training
 
 # %% Data split parameters
 
@@ -48,10 +53,6 @@ if p.data_split == 'cifar10_ssl_default':
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 x = np.concatenate((x_train, x_test)).astype('float32')
 y = np.concatenate((y_train, y_test))
-
-# Added for compatibility again
-x = np.transpose(x, (0,3,2,1))
-
 
 # class numbers -> one-hot representation
 y = tf.keras.utils.to_categorical(y)
@@ -96,10 +97,10 @@ metrics = [getattr(tf.keras.metrics, metric_class)(name=('%s_%s' % (metric_type,
            for metric_class, metric_name in zip(['CategoricalAccuracy'], ['acc'])]
 
 
-model = models.SemiSupervisedConsistencyModel(inputs=[model_arch.input],
-                                              outputs=[model_arch.output])
+model = models.SemiSupervisedConsistencyModel(p, inputs = [model_arch.input],
+                                              outputs = [model_arch.output])
 model.compile(optimizer = opt, loss = getattr(func, p.loss),
-              metrics = metrics, run_eagerly = run_eagerly, p = p)
+              metrics = metrics, run_eagerly = run_eagerly)
 
 # %% Train the model
 
@@ -108,11 +109,13 @@ start = time.time()
 exp_folder = os.path.join(p.results_path, p.exp_name)
 if not os.path.exists(exp_folder):
     os.makedirs(exp_folder)
+if not os.path.exists(os.path.join(exp_folder, 'debug')):
+    os.makedirs(os.path.join(exp_folder, 'debug'))
 
 csv_logger = tf.keras.callbacks.CSVLogger(os.path.join(exp_folder, 'training.csv'), separator = ",", append = False)
 
 history = model.fit(x = train_gen,
-                    epochs = 1,
+                    epochs = p.epochs,
                     verbose = 1,
                     validation_data = val_gen,
                     callbacks = [csv_logger])

@@ -20,7 +20,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 # %% Load and specify parameters
 
-p = OmegaConf.load('../params.yml')
+p = OmegaConf.load('params.yml')
 
 run_eagerly = True     # set to true to debug model training
 
@@ -114,6 +114,10 @@ opt = torch.optim.Adam(arch.parameters(), lr=0.001)
 
 model = models_torch.SemiSupervisedConsistencyModelTorch(arch)
 
+if p.transform_output:
+    p.transform_output = OmegaConf.merge(p.transform,
+                                         {} if p.transform_output == True else p.transform_output)
+
 # ----- Our training loop -------
 start = time.time()
 
@@ -128,7 +132,10 @@ for t in range(0, 10):
     # for i in tqdm(range(0, train_gen.__len__())):
     for i in tqdm(range(0, 15)):
         # obtain data from the generator
-        x, y, labeled = train_gen.__getitem__(i)
+        inputs, y, labeled = train_gen.__getitem__(i)
+
+        x = inputs[0]
+
         x = torch.Tensor(x)
         y = torch.Tensor(y)
         labeled = torch.Tensor(labeled)
