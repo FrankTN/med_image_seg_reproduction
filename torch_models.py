@@ -10,6 +10,17 @@ from torchinfo import summary
 import loss_torch
 
 
+class Print(nn.Module):
+    def __init__(self, label):
+        super(Print, self).__init__()
+        self.label = label
+
+    def forward(self, x):
+        print('label: ', self.label)
+        print(x.shape)
+        return x
+
+
 def simple_model(input: torch.tensor) -> nn.Sequential:
     flat_input = torch.flatten(input)
     model = nn.Sequential(nn.Linear(flat_input.size()[0], 512),
@@ -36,6 +47,7 @@ def large_model(input: torch.tensor, activation: str, dropout) -> nn.Sequential:
     # Conv layer params = (m*n*d+1)*k
 
     model = nn.Sequential(
+                            Print(0),
                             nn.Conv2d(in_channels=3, out_channels=96,kernel_size=(3, 3)),
                             activation_f,
                             nn.BatchNorm2d(96),
@@ -46,9 +58,11 @@ def large_model(input: torch.tensor, activation: str, dropout) -> nn.Sequential:
                             activation_f,
                             nn.BatchNorm2d(96),
 
+                            Print(1),
                             nn.MaxPool2d(kernel_size=(2, 2)),
                             nn.Dropout2d(p=dropout),
 
+                            Print(2),
                             nn.Conv2d(in_channels=96, out_channels=192, kernel_size=(3, 3)),
                             activation_f,
                             nn.BatchNorm2d(192),
@@ -59,9 +73,11 @@ def large_model(input: torch.tensor, activation: str, dropout) -> nn.Sequential:
                             activation_f,
                             nn.BatchNorm2d(192),
 
+                            Print(3),
                             nn.MaxPool2d(kernel_size=(2, 2)),
                             nn.Dropout2d(p=dropout),
 
+                            Print(4),
                             nn.Conv2d(in_channels=192, out_channels=192, kernel_size=(3, 3)),
                             activation_f,
                             nn.BatchNorm2d(192),
@@ -72,8 +88,10 @@ def large_model(input: torch.tensor, activation: str, dropout) -> nn.Sequential:
                             activation_f,
                             nn.BatchNorm2d(192),
 
+                            Print(5),
                             nn.AvgPool2d(192),
 
+                            Print(6),
                             nn.Linear(192, 10),
                             nn.Softmax(dim=1),
     )

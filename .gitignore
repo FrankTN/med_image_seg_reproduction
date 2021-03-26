@@ -3,3 +3,4 @@
 venv/
 *.tar.gz
 data
+__pycache__*
