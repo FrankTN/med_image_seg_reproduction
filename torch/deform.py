@@ -20,3 +20,9 @@ X_deformed.backward(dY)
 print(X.grad)
 
 # x_deformed = elasticdeform.deform_random_grid(data,sigma=)
+def deform(y):
+    np.random.randn()
+    displacement_val = np.random.randn(y.shape) * 5
+    displacement = torch.tensor(displacement_val)
+    y_deformed = etorch.deform_grid(y, displacement, order=3)
+    return y_deformed

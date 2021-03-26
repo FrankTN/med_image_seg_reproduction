@@ -112,7 +112,7 @@ if not os.path.exists(exp_folder):
 csv_logger = tf.keras.callbacks.CSVLogger(os.path.join(exp_folder, 'training.csv'), separator = ",", append = False)
 
 history = model.fit(x = train_gen,
-                    epochs = p.epochs,
+                    epochs = 1,
                     verbose = 1,
                     validation_data = val_gen,
                     callbacks = [csv_logger])

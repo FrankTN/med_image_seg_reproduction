@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+import deform
 
 
 def kl_divergence(y_true, y_pred):
@@ -47,6 +48,8 @@ def custom_loss(data, pred, p):
 
     # separate differently transformed
     pred1, pred2 = pred[:n, ...], pred[n:, ...]
+
+    pred2 = deform.deform(pred2)
 
     # supervised loss
     loss_sup = kl_divergence(yl, predl)
