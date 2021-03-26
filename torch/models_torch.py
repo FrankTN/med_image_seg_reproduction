@@ -111,7 +111,7 @@ def large_model(input: torch.tensor, activation: str, dropout) -> nn.Sequential:
         nn.Linear(1, 10),
         # Print(7),
         # output: 256 x 1 x 1 x 10
-        nn.Softmax(dim=1),
+        nn.Softmax(dim=3),
         # Print(8),
         # output: 256 x 1 x 1 x 10
     )

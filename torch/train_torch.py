@@ -12,6 +12,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 from tqdm import tqdm
+import pandas as pd
 
 
 # comment this line out to use gpu:
@@ -119,8 +120,13 @@ start = time.time()
 criterion = loss.custom_loss
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-for t in tqdm(range(0, p.epochs)):
-    for i in range(0,train_gen.__len__()):
+losses = []
+
+# for t in range(0, p.epochs):
+for t in range(0, 10):
+    print('epoch ', t)
+    # for i in tqdm(range(0, train_gen.__len__())):
+    for i in tqdm(range(0, 15)):
         # obtain data from the generator
         x, y, labeled = train_gen.__getitem__(i)
         x = torch.Tensor(x)
@@ -141,7 +147,13 @@ for t in tqdm(range(0, p.epochs)):
         optimizer.step()
     train_gen.on_epoch_end()
     print(str(t) + "\n")
-    print("loss:", loss.item(),"loss_sup:", loss_sup.item(), "loss_usup:", loss_usup.item(),)
+    print('epoch ', t, 'done. Loss:')
+    loss = ["loss: ", loss.item(), ", loss_sup: ", loss_sup.item(), ", loss_usup: ", loss_usup.item()]
+    losses.append(loss)
+    print(loss)
 
-
+print('all losses:')
+print(losses)
+losses_df = pd.DataFrame(losses)
+losses_df.to_csv('./losses.csv')
 
