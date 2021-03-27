@@ -146,10 +146,10 @@ for t in range(0, 10):
 
         x_flat = torch.flatten(x, start_dim=1)
         # forward pass
-        y_pred = model(x)
+        # y_pred = model(x)
 
         # compute loss
-        loss, loss_sup, loss_usup, (yl, predl), (pred1, pred2) = criterion(((x, transform_parameters), y, labeled), y_pred, p)
+        loss, loss_sup, loss_usup, (yl, predl), (pred1, pred2) = criterion(((x, transform_parameters), y, labeled), model, p)
 
         loss.backward()
         optimizer.step()

@@ -16,7 +16,7 @@ def kl_divergence(y_true, y_pred):
         return torch.mean(torch.nn.KLDivLoss(reduction='batchmean')(y_pred.log(), y_true))
         # return tf.keras.backend.mean(tf.keras.losses.kl_divergence(y_true, y_pred))
 
-def custom_loss(data, pred, p):
+def custom_loss(data, model, p):
     """
     Compute total loss:
         supervised + unsupervised consistency loss.
@@ -79,6 +79,8 @@ def custom_loss(data, pred, p):
                                               'debug/model_transformed_input.png'))
 
     # -- end transformation --
+
+    pred = model(x)
 
     # separate differently transformed
     pred1, pred2 = pred[:n, ...], pred[n:, ...]
