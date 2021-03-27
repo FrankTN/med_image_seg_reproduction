@@ -2,8 +2,8 @@
 
 
 from pyoneer_main.datagen import SimpleSequence
-import models_torch
-import loss_torch as loss
+import replication.models_torch as models_torch
+import replication.loss_torch as loss
 from omegaconf import OmegaConf
 import numpy as np
 import os
@@ -134,9 +134,10 @@ for t in range(0, 10):
         # obtain data from the generator
         inputs, y, labeled = train_gen.__getitem__(i)
 
-        x = inputs[0]
+        x = torch.Tensor(inputs[0])
+        transform_parameters = torch.Tensor(inputs[1:])
 
-        x = torch.Tensor(x)
+        # x = torch.Tensor(x)
         y = torch.Tensor(y)
         labeled = torch.Tensor(labeled)
 
@@ -148,7 +149,7 @@ for t in range(0, 10):
         y_pred = model(x)
 
         # compute loss
-        loss, loss_sup, loss_usup, (yl, predl), (pred1, pred2) = criterion((x, y, labeled), y_pred, p)
+        loss, loss_sup, loss_usup, (yl, predl), (pred1, pred2) = criterion(((x, transform_parameters), y, labeled), y_pred, p)
 
         loss.backward()
         optimizer.step()
