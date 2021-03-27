@@ -2,7 +2,7 @@ import torch
 from omegaconf import OmegaConf
 from torch import nn
 import deform
-import pyoneer_main.func as func
+import replication.func_torch as func
 import os
 import pyoneer_main.improc as improc
 
@@ -43,7 +43,7 @@ def custom_loss(data, pred, p):
     inputs, y, labeled = data
 
     x = inputs[0]
-    transform_parameters = inputs[1:]
+    transform_parameters = inputs[1]
 
     # number of unique labeled and labeled+unlabeled images
     n_labeled = torch.count_nonzero(labeled)
@@ -51,10 +51,11 @@ def custom_loss(data, pred, p):
 
     # -- transformation --
     # get a transform function
+    # func.get_batch_transform_displacement_map(*transform_parameters,**p.transform.params_apply)
     transform = getattr(func, 'get_batch_transform_' + p.transform.apply_func) \
         (*transform_parameters, **p.transform.params_apply)
 
-    t_x = transform(x)  # transform input images
+    t_x = torch.stack(transform(x)) # transform input images
     x = torch.cat((x, t_x), dim=0)  # form a batch to feed to the network
 
     # if network outputs and labels also need to be transformed (as in the segmentation case):

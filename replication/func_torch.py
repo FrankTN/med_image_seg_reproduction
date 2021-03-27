@@ -30,7 +30,7 @@ def get_batch_transform_displacement_map(displacement, interpolation_order = 3):
 
     """
     
-    fn = lambda x: (etorch.deform_grid(x[0], x[1], order = interpolation_order, axis = (1, 2)), x[1])
-    
-    return lambda x: tf.map_fn(fn, elems = (x, displacement))[0]
+    fn = lambda x: ([etorch.deform_grid(y, d, order = interpolation_order, axis = (1, 2)) for y, d in zip(x, displacement)], displacement)[0]
+
+    return fn
 
