@@ -124,13 +124,13 @@ start = time.time()
 criterion = loss.custom_loss
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-losses = []
+losses = pd.DataFrame()
 
 # for t in range(0, p.epochs):
-for t in range(0, 10):
+for t in range(0, 5):
     print('epoch ', t)
-    # for i in tqdm(range(0, train_gen.__len__())):
-    for i in tqdm(range(0, 15)):
+    for i in tqdm(range(0, train_gen.__len__())):
+    # for i in tqdm(range(0, 30)):
         # obtain data from the generator
         inputs, y, labeled = train_gen.__getitem__(i)
 
@@ -149,19 +149,17 @@ for t in range(0, 10):
         # y_pred = model(x)
 
         # compute loss
-        loss, loss_sup, loss_usup, (yl, predl), (pred1, pred2) = criterion(((x, transform_parameters), y, labeled), model, p)
+        loss_total, loss_sup, loss_usup, (yl, predl), (pred1, pred2) = criterion(((x, transform_parameters), y, labeled), model, p)
 
-        loss.backward()
+        loss_total.backward()
         optimizer.step()
     train_gen.on_epoch_end()
     print(str(t) + "\n")
     print('epoch ', t, 'done. Loss:')
-    loss = ["loss: ", loss.item(), ", loss_sup: ", loss_sup.item(), ", loss_usup: ", loss_usup.item()]
-    losses.append(loss)
-    print(loss)
+    losses = losses.append([loss_total.item(), loss_sup.item(), loss_usup.item()])
+    print("loss: ", loss_total.item(), ", loss_sup: ", loss_sup.item(), ", loss_usup: ", loss_usup.item())
 
 print('all losses:')
 print(losses)
-losses_df = pd.DataFrame(losses)
-losses_df.to_csv('./losses.csv')
+losses.to_csv('./losses.csv')
 

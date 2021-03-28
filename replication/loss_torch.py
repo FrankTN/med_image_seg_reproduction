@@ -1,6 +1,7 @@
 import torch
 from omegaconf import OmegaConf
 from torch import nn
+import torch.nn.functional as F
 import deform
 import replication.func_torch as func
 import os
@@ -13,8 +14,7 @@ def kl_divergence(y_true, y_pred):
         # There are no labeled training examples
         return 0
     else:
-        return torch.mean(torch.nn.KLDivLoss(reduction='batchmean')(y_pred.log(), y_true))
-        # return tf.keras.backend.mean(tf.keras.losses.kl_divergence(y_true, y_pred))
+        return nn.KLDivLoss(reduction='batchmean')(y_pred.log(), y_true) / len(y_true)
 
 def custom_loss(data, model, p):
     """
