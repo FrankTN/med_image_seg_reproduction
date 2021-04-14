@@ -1,8 +1,3 @@
-# import tensorflow as tf
-#
-# from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPooling2D, \
-#     GlobalAveragePooling2D, BatchNormalization, Dropout
-
 import torch
 from pyoneer_main import models
 from torch import nn
@@ -12,7 +7,7 @@ import loss_torch
 
 class Print(nn.Module):
     """
-    Debug layer for printing layer dimensions
+    Debug layer for printing layer dimensions, useful for debugging
     """
 
     def __init__(self, label):
@@ -20,11 +15,17 @@ class Print(nn.Module):
         self.label = label
 
     def forward(self, x):
+        # Print dimensions of the input and perform identity operation
         print('label: ', self.label, ', shape: ', x.shape)
         return x
 
 
 def simple_model(input: torch.tensor) -> nn.Sequential:
+    """
+    :param input: a tensor which we use to define the input dimension
+    :return: a simple neural network, consisting of 3 FC layers with ReLU nonlinearities and a softmax at the end.
+            1,841,162 trainable parameters
+    """
     flat_input = torch.flatten(input)
     model = nn.Sequential(nn.Linear(flat_input.size()[0], 512),
                           nn.ReLU(),
@@ -38,7 +39,20 @@ def simple_model(input: torch.tensor) -> nn.Sequential:
 
 
 def large_model(input: torch.tensor, activation: str, dropout) -> nn.Sequential:
-    # NUM_CHANNELS = 3
+    """
+    Instantiates a large CNN. There are 26 layers in total. The first part of the network consists of 3 stacks of
+    convolutional layer with batchnorm. After this we have a max pooling layer and a dropout layer. Then there is
+    another stack of 3 convolutional layers with batchnorm stack, again followed by a max pooling and dropout layer.
+    Finally, there is another stack of 3 convolutional layers with batchnorm, followed by average pooling,
+    a fully connected layer and a softmax nonlinearity. Note that this Pytorch model is exactly the same as the
+    Tensorflow model implemented in the paper, apart from having half the trainable parameters in the batchnorm
+    layers (a difference between Pytorch and Tensorflow implementations) and apart from the fact that we output
+    probabilities using a softmax layer, instead of an image segmentation.
+    :param input: tensor used for compatibility reasons
+    :param activation: string specifying the type of activation function
+    :param dropout:
+    dropout probability, in [0,1] :return: a large neural network
+    """
 
     flat_input = torch.flatten(input)
 
@@ -118,10 +132,6 @@ def large_model(input: torch.tensor, activation: str, dropout) -> nn.Sequential:
     # print('Instantiated a complicated model:\n' + str(model))
     return model
 
-
-# summary(simple_model(torch.empty([3,32,32])))
-# print(models.get_simple_model().summary())
-
 class SemiSupervisedConsistencyModelTorch(nn.Module):
 
     # def __init__(self, p, optimizer, loss, metrics=[]):
@@ -132,6 +142,9 @@ class SemiSupervisedConsistencyModelTorch(nn.Module):
     def forward(self, data):
         return self.model(data)
 
+# Statements used for debugging the architecture
+# summary(simple_model(torch.empty([3,32,32])))
+# print(models.get_simple_model().summary())
 print('pytorch:')
 summary(large_model(torch.empty([32,32]), '', 0.4))
 print('tensorflow:')

@@ -14,7 +14,7 @@ def kl_divergence(y_true, y_pred):
         # There are no labeled training examples
         return 0
     else:
-        return nn.KLDivLoss(reduction='batchmean')(y_pred.log(), y_true) / len(y_true)
+        return nn.KLDivLoss(reduction='batchmean')(y_pred.log(), y_true) #/ len(y_true)
 
 def custom_loss(data, model, p):
     """

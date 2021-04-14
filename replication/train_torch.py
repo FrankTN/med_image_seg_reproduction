@@ -20,7 +20,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 # %% Load and specify parameters
 
-p = OmegaConf.load('params.yml')
+p = OmegaConf.load('params_noise.yml')
 
 run_eagerly = True     # set to true to debug model training
 
